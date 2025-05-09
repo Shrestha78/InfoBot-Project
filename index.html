@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InfoBot</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/4712/4712033.png" type="image/png" />
+
+    <style>
+         :root {
+            --bg-color: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --box-bg: rgba(255, 255, 255, 0.07);
+            --text-user: #00ffc8;
+            --text-bot: #ff6ec7;
+            --input-bg: #282828;
+            --btn-bg: #ff005c;
+            --btn-hover: #cc0047;
+        }
+        
+        body.light {
+            --bg-color: linear-gradient(135deg, #ffffff, #cde7ff, #f4f4f4);
+            --box-bg: rgba(0, 0, 0, 0.05);
+            --text-user: #00796b;
+            --text-bot: #d81b60;
+            --input-bg: #e0e0e0;
+            --btn-bg: #007bff;
+            --btn-hover: #0056b3;
+        }
+        
+        body {
+            background: var(--bg-color);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            transition: 0.5s;
+        }
+        
+        #chat-container {
+            background-color: var(--box-bg);
+            width: 90%;
+            max-width: 600px;
+            height: 85vh;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+        
+        #chatbot-icon {
+            width: 90px;
+            height: 90px;
+            background-color: #1a1a2e;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        
+        #chatbot-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #chatbox {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #101010;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 17px;
+        }
+        
+        body.light #chatbox {
+            background-color: #f7f7f7;
+            color: black;
+        }
+        
+        #chatbox p {
+            margin: 10px 0;
+        }
+        
+        #chatbox p.user {
+            color: var(--text-user);
+        }
+        
+        #chatbox p.bot {
+            color: var(--text-bot);
+        }
+        
+        #chat-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #user-input {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            background-color: var(--input-bg);
+            color: black;
+        }
+        
+        #chat-form button,
+        #theme-btn {
+            padding: 10px 14px;
+            background-color: var(--btn-bg);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        #chat-form button:hover,
+        #theme-btn:hover {
+            background-color: var(--btn-hover);
+        }
+        
+        #button-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chat-container">
+        <div id="chatbot-icon">
+            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712033.png" alt="Cute Robot" />
+        </div>
+
+        <div id="chatbox">
+            <!-- Chat and messages will appear here -->
+        </div>
+
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Type your message..." />
+            <button type="submit">Send</button>
+        </form>
+
+        <div id="button-bar">
+            <button id="theme-btn">🌓 Theme</button>
+        </div>
+    </div>
+
+    <script>
+        const chatbox = document.getElementById("chatbox");
+        const input = document.getElementById("user-input");
+
+        document.getElementById("chat-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const userInput = input.value.trim();
+            if (!userInput) return;
+
+            chatbox.innerHTML += `<p class="user"><strong>You:</strong> ${userInput}</p>`;
+
+            fetch("/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        message: userInput
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    chatbox.innerHTML += `<p class="bot"><strong>Bot:</strong> ${data.reply}</p>`;
+                    chatbox.scrollTop = chatbox.scrollHeight;
+                });
+
+            input.value = "";
+        });
+
+        // Theme toggle
+        const themeBtn = document.getElementById("theme-btn");
+        themeBtn.addEventListener("click", () => {
+            document.body.classList.toggle("light");
+        });
+    </script>
+</body>
+
+</html>
